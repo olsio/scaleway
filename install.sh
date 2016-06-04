@@ -3,7 +3,19 @@
 export DEBIAN_FRONTEND=noninteractive
 apt-get -q update && \
     apt-get -y -q upgrade && \
-    apt-get install -y -q curl iptables iptables-persistent openvpn nginx supervisor zip uuid git mc wget vim && \
+    apt-get install -y -q curl \
+        iptables \
+        iptables-persistent \
+        openvpn \
+        nginx \
+        supervisor \
+        zip \
+        uuid \
+        git \
+        mc \
+        wget \
+        bc \
+        vim && \
     apt-get clean
 
 rm -f /etc/nginx/sites-available/*
@@ -11,8 +23,8 @@ rm -f /etc/nginx/sites-enabled/*
 
 rm -rf ./scaleway
 git clone https://github.com/olsio/scaleway.git scaleway
-cp -R ./scaleway/overlay/etc/* /etc
-cp -R ./scaleway/overlay/usr/local/* /usr/local
+cp -R ./scaleway/overlay/* /
+
 
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | bash
 source .bashrc
@@ -30,4 +42,12 @@ wget -qO ghost.zip https://ghost.org/zip/ghost-latest.zip && \
 
 useradd ghost && chown -R ghost:ghost /var/www
 
+openssl dhparam -out dhparam.pem 4096
+
 ln -sf /etc/nginx/sites-available/olsio /etc/nginx/sites-enabled/olsio
+
+git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
+cd /opt/letsencrypt
+
+
+./letsencrypt-auto certonly -a webroot --webroot-path=/tmp -d donottest.me
