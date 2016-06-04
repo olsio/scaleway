@@ -26,4 +26,5 @@ wget -qO ghost.zip https://ghost.org/zip/ghost-latest.zip && \
 
 useradd ghost && chown -R ghost:ghost /var/www
 
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/olsio /etc/nginx/sites-enabled/olsio && \
+    rm -f /etc/nginx/sites-enabled/default
