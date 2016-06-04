@@ -25,6 +25,8 @@ rm -rf ./scaleway
 git clone https://github.com/olsio/scaleway.git scaleway
 cp -R ./scaleway/overlay/* /
 
+ln -sf /etc/nginx/sites-available/cert-only /etc/nginx/sites-enabled/cert-only
+
 
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | bash
 source .bashrc
@@ -42,8 +44,14 @@ wget -qO ghost.zip https://ghost.org/zip/ghost-latest.zip && \
 
 useradd ghost && chown -R ghost:ghost /var/www
 
-openssl dhparam -out dhparam.pem 4096
+openssl dhparam -out /etc/letsencrypt/dh/dhparam.pem 4096
 
+config_file="/usr/local/etc/le-renew-webroot.ini"
+tmp_dir="/tmp/letsencrypt-auto"
+le_path='/opt/letsencrypt'
+$le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
+
+rm -f /etc/nginx/sites-enabled/*
 ln -sf /etc/nginx/sites-available/olsio /etc/nginx/sites-enabled/olsio
 
 git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
