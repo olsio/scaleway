@@ -1,4 +1,4 @@
-FROM scaleway/ubuntu:xenial
+FROM scaleway/ubuntu:amd64-xenial
 MAINTAINER Oliver Schneider <os@ols.io>
 
 # Prepare rootfs for image-builder
@@ -11,16 +11,16 @@ RUN apt-get -q update \
 	curl \
 	iptables \
 	iptables-persistent \
-  openvpn \
-  nginx \
-  supervisor \
-  zip \
+	openvpn \
+	nginx \
+	supervisor \
+	zip \
 	uuid \
  && apt-get clean
 
 # Patch rootfs
-ADD ./patches/etc/ /etc/
-ADD ./patches/usr/local/ /usr/local/
+ADD ./overlay/etc/ /etc/
+ADD ./overlay/usr/local/ /usr/local/
 
 
 # Clean rootfs from image-builder
