@@ -79,7 +79,7 @@ $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 (crontab -l 2>/dev/null; echo "30 2 * * * /usr/local/sbin/le-renew-webroot >> /var/log/le-renewal.log") | crontab -
 
 uuidgen=$(uuidgen)
-echo $uuidgen | htpasswd -cBi /etc/nginx/.htpasswd ols
+echo $uuidgen | htpasswd -csi /etc/nginx/.htpasswd ols
 echo "ghost-password: $uuidgen"
 
 ##############################################################

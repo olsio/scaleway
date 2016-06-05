@@ -78,8 +78,11 @@ server {
   location ~ ^/(?:ghost/api) {
     # Tell the browser to don't cache API calls
     expires 0;
-    add_header Cache-Control "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0";
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Host $http_host;
     proxy_pass http://ghost_upstream;
+    add_header Cache-Control "no-cache, private, no-store,must-revalidate, max-stale=0, post-check=0, pre-check=0";
+    proxy_set_header X-Forwarded-Proto https;
   }
 
   # Admin
@@ -90,8 +93,11 @@ server {
 
     # Tell the browser to don't cache API calls
     expires 0;
-    add_header Cache-Control "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0";
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Host $http_host;
     proxy_pass http://ghost_upstream;
+    add_header Cache-Control "no-cache, private, no-store,must-revalidate, max-stale=0, post-check=0, pre-check=0";
+    proxy_set_header X-Forwarded-Proto https;
   }
 }
 
