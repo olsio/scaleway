@@ -33,7 +33,7 @@ server {
   }
 
   location /assets {
-    alias /var/www/themes/uno-master/assets;
+    alias /var/www/content/themes/casper/assets;
     access_log off;
     expires max;
   }
