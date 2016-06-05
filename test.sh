@@ -1,13 +1,23 @@
 #!/bin/sh
 
-if [ "$#" -ne 4 ]; then
-    echo "usage test.sh domain ssl_domains smtp_user smtp_password"
-    exit
-fi
+while [[ -z "$DOMAIN" ]]
+do
+  read -p "Enter the main domain for your blog: " DOMAIN
+done
 
-domain=$1
-ssl_domains=$2
-smtp_user=$3
-smtp_password=$4
+while [[ -z "$SSL_DOMAINS" ]]
+do
+  read -p "Enter all domains that should be ssl protected: " SSL_DOMAINS
+done
 
-echo $domain $ssl_domains $smtp_user $smtp_password
+while [[ -z "$SMTP_USER" ]]
+do
+  read -p "Enter maingun SMTP user: " SMTP_USER
+done
+
+while [[ -z "$SMTP_USER" ]]
+do
+  read -s -p "Enter maingun SMTP user: " SMTP_USER
+done
+
+echo $DOMAIN $SSL_DOMAINS $SMTP_USER $SMTP_USER
