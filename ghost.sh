@@ -1,7 +1,6 @@
 #!/bin/sh
 
 
-
 ##############################################################
 # Installing base pagages
 ##############################################################
@@ -81,6 +80,7 @@ $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 
 uuidgen=$(uuidgen)
 echo $uuidgen | htpasswd -cBi /etc/nginx/.htpasswd ols
+echo "ghost-password: $uuidgen"
 
 ##############################################################
 # Enable SSL nginx site
