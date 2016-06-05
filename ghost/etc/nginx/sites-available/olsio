@@ -1,8 +1,3 @@
-upstream ghost_upstream {
-  server 127.0.0.1:2368;
-  keepalive 64;
-}
-
 server {
 
   listen 443 ssl;
@@ -23,34 +18,7 @@ server {
     proxy_set_header X-Real-IP  $remote_addr;
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header Host $host;
-    proxy_pass http://ghost_upstream;
-  }
-
-  location /content/images {
-    alias /var/www/content/images;
-    access_log off;
-    expires max;
-  }
-
-  location /public {
-    alias /var/www/core/built/public;
-    access_log off;
-    expires max;
-  }
-
-  location /ghost/scripts {
-    alias /var/www/core/built/scripts;
-    access_log off;
-    expires max;
-  }
-
-  location ~ ^/(?:ghost|signout) {
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header Host $http_host;
-    proxy_pass http://ghost_upstream;
-    add_header Cache-Control "no-cache, private, no-store,
-    must-revalidate, max-stale=0, post-check=0, pre-check=0";
-    proxy_set_header X-Forwarded-Proto https;
+    proxy_pass http://127.0.0.1:2368;
   }
 }
 
