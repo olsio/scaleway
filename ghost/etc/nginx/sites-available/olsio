@@ -25,6 +25,30 @@ server {
     proxy_set_header Host $host;
     proxy_pass http://ghost_upstream;
   }
+
+  location /content/images {
+    alias /var/www/content/images;
+    access_log off;
+    expires max;
+  }
+
+  location /assets {
+    alias /var/www/themes/uno-master/assets;
+    access_log off;
+    expires max;
+  }
+
+  location /public {
+    alias /var/www/core/built/public;
+    access_log off;
+    expires max;
+  }
+
+  location /ghost/scripts {
+    alias /var/www/core/built/scripts;
+    access_log off;
+    expires max;
+  }
 }
 
 server {
