@@ -5,9 +5,10 @@ upstream ghost_upstream {
 
 server {
 
-  server_name donottest.me;
   listen 443 ssl http2;
   listen [::]:443 ssl http2 ipv6only=on;
+
+  server_name donottest.me;
 
   ssl_certificate /etc/letsencrypt/live/donottest.me/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/donottest.me/privkey.pem;
