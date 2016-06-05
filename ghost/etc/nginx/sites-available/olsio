@@ -4,9 +4,6 @@ upstream ghost_upstream {
 }
 
 proxy_cache_path /var/run/cache levels=1:2 keys_zone=STATIC:75m inactive=24h max_size=512m;
-
-gzip on;
-gzip_disable "msie6";
 gzip_vary on;
 gzip_proxied any;
 gzip_comp_level 6;
