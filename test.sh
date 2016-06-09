@@ -1,4 +1,10 @@
 #!/bin/sh
+MAIN_DOMAIN="ARG1"
+ALL_DOMAIN_ALIASES="ARG2"
+SMTP_USER="ARG3"
+SMTP_PASSWORD="ARG4"
+EMAIL="ARG5"
+
 MAIN_DOMAIN="$1"
 ALL_DOMAIN_ALIASES="$2"
 SMTP_USER="$3"
@@ -11,11 +17,11 @@ git clone https://github.com/olsio/scaleway.git scaleway
 ##############################################################
 # Patch files
 ##############################################################
-find ./scaleway/overlay/ -name '*' -exec sed -i 's/MAIN_DOMAIN/$MAIN_DOMAIN/g' {} +
-find ./scaleway/overlay/ -name '*' -exec sed -i 's/ALL_DOMAIN_ALIASES/$ALL_DOMAIN_ALIASES/g' {} +
-find ./scaleway/overlay/ -name '*' -exec sed -i 's/SMTP_USER/$SMTP_USER/g' {} +
-find ./scaleway/overlay/ -name '*' -exec sed -i 's/SMTP_PASSWORD/$SMTP_PASSWORD/g' {} +
-find ./scaleway/overlay/ -name '*' -exec sed -i 's/EMAIL/$EMAIL/g' {} +
+find ./scaleway/ghost/ -type f -exec sed -i 's/MAIN_DOMAIN/$MAIN_DOMAIN/g' {} +
+find ./scaleway/ghost/overlay/ -name '*' -exec sed -i 's/ALL_DOMAIN_ALIASES/$ALL_DOMAIN_ALIASES/g' {} +
+find ./scaleway/ghost/overlay/ -name '*' -exec sed -i 's/SMTP_USER/$SMTP_USER/g' {} +
+find ./scaleway/ghost/overlay/ -name '*' -exec sed -i 's/SMTP_PASSWORD/$SMTP_PASSWORD/g' {} +
+find ./scaleway/ghost/overlay/ -name '*' -exec sed -i 's/EMAIL/$EMAIL/g' {} +
 
 
 
