@@ -2,7 +2,7 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server ipv6only=on;
 
-    server_name ols.io www.ols.io;
+    server_name MAIN_DOMAIN;
 
     location '/.well-known/acme-challenge' {
         default_type "text/plain";

@@ -1,4 +1,9 @@
 #!/bin/sh
+MAIN_DOMAIN="$1"
+ALL_DOMAIN_ALIASES="$2"
+SMTP_USER="$3"
+SMTP_PASSWORD="$4"
+EMAIL="$5"
 
 ##############################################################
 # Installing base pagages
@@ -26,14 +31,22 @@ apt-get -q update && \
 ##############################################################
 # Clean default files
 ##############################################################
-rm -f /etc/nginx/sites-available/*
 rm -f /etc/nginx/sites-enabled/*
 
 ##############################################################
-# Download and copy custom scripts and configurations
+# Download custom scripts and configurations
 ##############################################################
 rm -rf ./scaleway
 git clone https://github.com/olsio/scaleway.git scaleway
+
+##############################################################
+# Patch files
+##############################################################
+find . -type f -name "*baz*" -exec sed -i 's/foo/bar/g' {} +
+
+##############################################################
+# Copy to destinations
+##############################################################
 cp -R ./scaleway/overlay/* /
 
 ##############################################################
