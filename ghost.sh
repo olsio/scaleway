@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 ##############################################################
 # Installing base pagages
 ##############################################################
@@ -20,16 +19,15 @@ apt-get -q update && \
         wget \
         bc \
         apache2-utils \
+        w3m \
         vim && \
     apt-get clean
-
 
 ##############################################################
 # Clean default files
 ##############################################################
 rm -f /etc/nginx/sites-available/*
 rm -f /etc/nginx/sites-enabled/*
-
 
 ##############################################################
 # Download and copy custom scripts and configurations
@@ -38,7 +36,6 @@ rm -rf ./scaleway
 git clone https://github.com/olsio/scaleway.git scaleway
 cp -R ./scaleway/overlay/* /
 
-
 ##############################################################
 # Install node
 ##############################################################
@@ -46,7 +43,6 @@ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | b
 source .bashrc
 nvm install v0.10.40
 n=$(which node);n=${n%/bin/node}; chmod -R 755 $n/bin/*; sudo cp -r $n/{bin,lib,share} /usr/local
-
 
 ##############################################################
 # Install ghost
@@ -58,7 +54,6 @@ wget -qO ghost.zip https://ghost.org/zip/ghost-latest.zip && \
     cd /var/www && npm install --production && \
     cd -
 useradd ghost && chown -R ghost:ghost /var/www
-
 
 ##############################################################
 # Start supervisord on reboot
@@ -78,9 +73,9 @@ le_path='/opt/letsencrypt'
 $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 (crontab -l 2>/dev/null; echo "30 2 * * * /usr/local/sbin/le-renew-webroot >> /var/log/le-renewal.log") | crontab -
 
-uuidgen=$(uuidgen)
-echo $uuidgen | htpasswd -csi /etc/nginx/.htpasswd ols
-echo "ghost-password: $uuidgen"
+password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+echo $password | htpasswd -csi /etc/nginx/.htpasswd ols
+echo "ghost-password: $password"
 
 ##############################################################
 # Enable SSL nginx site

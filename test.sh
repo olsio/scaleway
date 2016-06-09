@@ -1,23 +1,14 @@
 #!/bin/sh
 
-while [ -z "$DOMAIN" ]
-do
-  read -p "Enter the main domain for your blog: " DOMAIN
-done
+if [ $# -eq 4 ]
+  then
+    echo "Usage $DOMAIN $SSL_DOMAINS $SMTP_USER $SMTP_PASSWORD"
+    exit 1
+fi
 
-while [ -z "$SSL_DOMAINS" ]
-do
-  read -p "Enter all domains that should be ssl protected: " SSL_DOMAINS
-done
-
-while [ -z "$SMTP_USER" ]
-do
-  read -p "Enter maingun SMTP user: " SMTP_USER
-done
-
-while [ -z "$SMTP_PASSWORD" ]
-do
-  read -s -p "Enter maingun SMTP password: " SMTP_PASSWORD
-done
+DOMAIN="$1"
+SSL_DOMAINS="$2"
+SMTP_USER="$3"
+SMTP_PASSWORD="$4"
 
 echo $DOMAIN $SSL_DOMAINS $SMTP_USER $SMTP_PASSWORD
