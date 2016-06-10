@@ -62,7 +62,7 @@ apt-get -q update && \
 ##############################################################
 # Clean default files
 ##############################################################
-rm -f /etc/nginx/sites-enabled/*
+#rm -f /etc/nginx/sites-enabled/*
 
 ##############################################################
 # Download custom scripts and configurations
@@ -73,10 +73,10 @@ git clone https://github.com/olsio/scaleway.git scaleway
 ##############################################################
 # Patch files
 ##############################################################
-find ./scaleway/ghost -type f -exec sed -i 's/MAIN_DOMAIN/$MAIN_DOMAIN/g' {} +
-find ./scaleway/ghost -type f -exec sed -i 's/ALL_DOMAIN_ALIASES/$ALL_DOMAIN_ALIASES/g' {} +
-find ./scaleway/ghost -type f -exec sed -i 's/SMTP_USER/$SMTP_USER/g' {} +
-find ./scaleway/ghost -type f -exec sed -i 's/SMTP_PASSWORD/$SMTP_PASSWORD/g' {} +
-find ./scaleway/ghost -type f -exec sed -i 's/EMAIL/$EMAIL/g' {} +
+find ./scaleway/ghost -type f -exec sed -i "s/MAIN_DOMAIN/$MAIN_DOMAIN/g" {} +
+find ./scaleway/ghost -type f -exec sed -i "s/ALL_DOMAIN_ALIASES/$ALL_DOMAIN_ALIASES/g" {} +
+find ./scaleway/ghost -type f -exec sed -i "s/SMTP_USER/$SMTP_USER/g" {} +
+find ./scaleway/ghost -type f -exec sed -i "s/SMTP_PASSWORD/$SMTP_PASSWORD/g" {} +
+find ./scaleway/ghost -type f -exec sed -i "s/EMAIL/$EMAIL/g" {} +
 
 find ./scaleway/ghost -type f -exec cat {} +
