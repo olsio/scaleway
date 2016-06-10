@@ -5,6 +5,31 @@ SMTP_USER="$3"
 SMTP_PASSWORD="$4"
 EMAIL="$5"
 
+if [ -z "$MAIN_DOMAIN" ]; then
+    echo "MAIN_DOMAIN not set"
+    exit 1
+fi
+
+if [ -z "$ALL_DOMAIN_ALIASES" ]; then
+    echo "ALL_DOMAIN_ALIASES not set"
+    exit 1
+fi
+
+if [ -z "$SMTP_USER" ]; then
+    echo "SMTP_USER not set"
+    exit 1
+fi
+
+if [ -z "$SMTP_PASSWORD" ]; then
+    echo "SMTP_PASSWORD not set"
+    exit 1
+fi
+
+if [ -z "$EMAIL" ]; then
+    echo "EMAIL not set"
+    exit 1
+fi
+
 ##############################################################
 # Installing base pagages
 ##############################################################
@@ -42,7 +67,11 @@ git clone https://github.com/olsio/scaleway.git scaleway
 ##############################################################
 # Patch files
 ##############################################################
-find . -type f -name "*baz*" -exec sed -i 's/foo/bar/g' {} +
+find ./scaleway/ghost -type f -exec sed -i 's/MAIN_DOMAIN/$MAIN_DOMAIN/g' {} +
+find ./scaleway/ghost -type f -exec sed -i 's/ALL_DOMAIN_ALIASES/$ALL_DOMAIN_ALIASES/g' {} +
+find ./scaleway/ghost -type f -exec sed -i 's/SMTP_USER/$SMTP_USER/g' {} +
+find ./scaleway/ghost -type f -exec sed -i 's/SMTP_PASSWORD/$SMTP_PASSWORD/g' {} +
+find ./scaleway/ghost -type f -exec sed -i 's/EMAIL/$EMAIL/g' {} +
 
 ##############################################################
 # Copy to destinations
