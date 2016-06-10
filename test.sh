@@ -1,5 +1,9 @@
 #!/bin/sh
-
+MAIN_DOMAIN="$1"
+ALL_DOMAIN_ALIASES="$2"
+SMTP_USER="$3"
+SMTP_PASSWORD="$4"
+EMAIL="$5"
 
 if [ -z "$MAIN_DOMAIN" ]; then
     echo "MAIN_DOMAIN not set"
