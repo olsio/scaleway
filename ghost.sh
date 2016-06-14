@@ -124,7 +124,7 @@ echo "ghost-password: $password"
 # Enable SSL nginx site
 ##############################################################
 rm -f /etc/nginx/sites-enabled/*
-ln -sf /etc/nginx/sites-available/olsio /etc/nginx/sites-enabled/olsio
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 /usr/sbin/service nginx restart
 
 ##############################################################
