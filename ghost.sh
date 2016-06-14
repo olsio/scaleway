@@ -39,7 +39,6 @@ apt-get -q update && \
     apt-get install -y -q curl \
         iptables \
         iptables-persistent \
-        openvpn \
         nginx \
         supervisor \
         zip \
@@ -101,17 +100,19 @@ useradd ghost && chown -R ghost:ghost /var/www
 # Start supervisord on reboot
 ##############################################################
 update-rc.d supervisor enable
-supervisor stop
-supervisor start
+service supervisor stop
+service supervisor start
 
 ##############################################################
 # Create lets encrypt certificates
 ##############################################################
 ln -sf /etc/nginx/sites-available/cert-only /etc/nginx/sites-enabled/cert-only
+/usr/sbin/service nginx restart
 git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
 config_file="/usr/local/etc/le-renew-webroot.ini"
 tmp_dir="/tmp/letsencrypt-auto"
 le_path='/opt/letsencrypt'
+mkdir -p $tmp_dir
 $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 (crontab -l 2>/dev/null; echo "30 2 * * * /usr/local/sbin/le-renew-webroot >> /var/log/le-renewal.log") | crontab -
 
@@ -124,7 +125,7 @@ echo "ghost-password: $password"
 ##############################################################
 rm -f /etc/nginx/sites-enabled/*
 ln -sf /etc/nginx/sites-available/olsio /etc/nginx/sites-enabled/olsio
-/usr/sbin/service nginx reload
+/usr/sbin/service nginx restart
 
 ##############################################################
 # Replace default dhparam with fresh primes
