@@ -75,7 +75,7 @@ find ./scaleway/ghost -type f -exec sed -i "s/EMAIL/$EMAIL/g" {} +
 ##############################################################
 # Copy to destinations
 ##############################################################
-cp -R ./scaleway/overlay/* /
+cp -R ./scaleway/ghost/* /
 
 ##############################################################
 # Install node
@@ -125,10 +125,10 @@ echo "ghost-password: $password"
 # Enable SSL nginx site
 ##############################################################
 rm -f /etc/nginx/sites-enabled/*
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/site /etc/nginx/sites-enabled/site
 /usr/sbin/service nginx restart
 
 ##############################################################
 # Replace default dhparam with fresh primes
 ##############################################################
-(openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /etc/letsencrypt/dh/dhparam.pem; /usr/sbin/service nginx reload) &
+nohup (openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /etc/letsencrypt/dh/dhparam.pem; /usr/sbin/service nginx reload) &
