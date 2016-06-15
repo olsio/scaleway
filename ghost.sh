@@ -96,7 +96,8 @@ wget -qO ghost.zip https://ghost.org/zip/ghost-latest.zip && \
     unzip ghost.zip -d /var/www/ && \
     rm -f ghost.zip && \
     cp -R ./scaleway/ghost/* / && \
-    cd /var/www && npm install --production && \
+    cd /var/www && npm install nodemailer-mailgunapi-transport --save && \
+    npm install --production && \
     cd -
 useradd ghost && chown -R ghost:ghost /var/www
 
@@ -122,7 +123,7 @@ $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 
 password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 echo $password | htpasswd -csi /etc/nginx/.htpasswd ghost
-echo "Your ghost password is $password" | ssmtp $EMAIL
+echo "$password" > /root/ghost.password
 
 ##############################################################
 # Enable SSL nginx site
@@ -135,3 +136,9 @@ ln -sf /etc/nginx/sites-available/site /etc/nginx/sites-enabled/site
 # Replace default dhparam with fresh primes
 ##############################################################
 nohup sh -c 'openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /etc/letsencrypt/dh/dhparam.pem; /usr/sbin/service nginx reload' >/dev/null 2>&1 &
+
+##############################################################
+# Pring Ghost admin password
+##############################################################
+echo "Ghost Password"
+cat /root/ghost.password
