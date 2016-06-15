@@ -4,10 +4,16 @@
 // Ghost runs in `development` mode by default. Full documentation can be found at http://support.ghost.org/config/
 
 var path = require('path'),
-var mailgunApiTransport = require('nodemailer-mailgunapi-transport'),
 config;
 
-donottest.me
+var mailgunApiTransport = require('nodemailer-mailgunapi-transport');
+
+var auth = {
+  auth: {
+    api_key: 'SMTP_PASSWORD',
+    domain: 'MAIN_DOMAIN'
+  }
+}
 
 config = {
     // ### Production
@@ -17,7 +23,7 @@ config = {
         url: 'https://MAIN_DOMAIN',
         mail: {
             from: 'SMTP_USER',
-            transport: mailgunApiTransport({apiKey: 'SMTP_PASSWORD', domain: 'donottest.me'}),
+            transport: mailgunApiTransport(auth),
         },
         database: {
             client: 'sqlite3',
