@@ -49,6 +49,7 @@ apt-get -q update && \
         bc \
         apache2-utils \
         w3m \
+        ssmtp \
         vim && \
     apt-get clean
 
@@ -71,6 +72,7 @@ find ./scaleway/ghost -type f -exec sed -i "s/ALL_DOMAIN_ALIASES/$ALL_DOMAIN_ALI
 find ./scaleway/ghost -type f -exec sed -i "s/SMTP_USER/$SMTP_USER/g" {} +
 find ./scaleway/ghost -type f -exec sed -i "s/SMTP_PASSWORD/$SMTP_PASSWORD/g" {} +
 find ./scaleway/ghost -type f -exec sed -i "s/EMAIL/$EMAIL/g" {} +
+find ./scaleway/ghost -type f -exec sed -i "s/HOSTNAME/$HOSTNAME/g" {} +
 
 ##############################################################
 # Copy to destinations
@@ -93,6 +95,7 @@ wget -qO ghost.zip https://ghost.org/zip/ghost-latest.zip && \
     rm -rf /var/www && \
     unzip ghost.zip -d /var/www/ && \
     rm -f ghost.zip && \
+    cp -R ./scaleway/ghost/* / && \
     cd /var/www && npm install --production && \
     cd -
 useradd ghost && chown -R ghost:ghost /var/www
@@ -118,17 +121,17 @@ $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 (crontab -l 2>/dev/null; echo "30 2 * * * /usr/local/sbin/le-renew-webroot >> /var/log/le-renewal.log") | crontab -
 
 password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-echo $password | htpasswd -csi /etc/nginx/.htpasswd ols
-echo "ghost-password: $password"
+echo $password | htpasswd -csi /etc/nginx/.htpasswd ghost
+echo "Your ghost password is $password" | ssmtp $EMAIL
 
 ##############################################################
 # Enable SSL nginx site
 ##############################################################
 rm -f /etc/nginx/sites-enabled/*
 ln -sf /etc/nginx/sites-available/site /etc/nginx/sites-enabled/site
-/usr/sbin/service nginx restart
+/usr/sbin/service nginx reload
 
 ##############################################################
 # Replace default dhparam with fresh primes
 ##############################################################
-nohup (openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /etc/letsencrypt/dh/dhparam.pem; /usr/sbin/service nginx reload) &
+nohup sh -c 'openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /etc/letsencrypt/dh/dhparam.pem; /usr/sbin/service nginx reload' >/dev/null 2>&1 &

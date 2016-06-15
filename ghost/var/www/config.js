@@ -11,8 +11,9 @@ config = {
     // When running Ghost in the wild, use the production environment.
     // Configure your URL and mail settings here
     production: {
-        url: 'http://MAIN_DOMAIN',
+        url: 'https://MAIN_DOMAIN',
         mail: {
+            from: 'SMTP_USER',
             transport: 'SMTP',
             options: {
                 service: 'Mailgun',
