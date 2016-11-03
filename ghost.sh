@@ -34,6 +34,8 @@ fi
 # Installing base pagages
 ##############################################################
 export DEBIAN_FRONTEND=noninteractive
+apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg
+echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 apt-get -q update && \
     apt-get -y -q upgrade && \
     apt-get install -y -q curl \
@@ -54,6 +56,7 @@ apt-get -q update && \
         w3m \
         ssmtp \
         build-essential \
+        yarn \
         vim && \
     apt-get clean
 
