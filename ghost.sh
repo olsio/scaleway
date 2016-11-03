@@ -40,7 +40,10 @@ apt-get -q update && \
         iptables \
         iptables-persistent \
         nginx \
+        openvpn \
         supervisor \
+        stunnel4 \
+        uuid \
         zip \
         uuid \
         git \
@@ -50,8 +53,15 @@ apt-get -q update && \
         apache2-utils \
         w3m \
         ssmtp \
+        build-essential \
         vim && \
     apt-get clean
+
+##############################################################
+# Installing Node
+##############################################################
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+apt-get install -y -q nodejs
 
 ##############################################################
 # Clean default files
@@ -78,15 +88,6 @@ find ./scaleway/ghost -type f -exec sed -i "s/HOSTNAME/$HOSTNAME/g" {} +
 # Copy to destinations
 ##############################################################
 cp -R ./scaleway/ghost/* /
-
-##############################################################
-# Install node
-##############################################################
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | bash
-export NVM_DIR="/root/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-nvm install v0.10.40
-n=$(which node);n=${n%/bin/node}; chmod -R 755 $n/bin/*; sudo cp -r $n/{bin,lib,share} /usr/local
 
 ##############################################################
 # Install ghost
