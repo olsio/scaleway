@@ -37,15 +37,12 @@ export DEBIAN_FRONTEND=noninteractive
 apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg
 echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 apt-get -q update && \
-    apt-get -y -q upgrade && \
-    apt-get install -y -q curl \
+    apt-get -y -q -o Dpkg::Options::="--force-confnew" dist-upgrade && \
+    apt-get install -y -q -o Dpkg::Options::="--force-confnew" curl \
         iptables \
         iptables-persistent \
         nginx \
-        openvpn \
         supervisor \
-        stunnel4 \
-        uuid \
         zip \
         uuid \
         git \
