@@ -22,6 +22,9 @@ apt-get -q update && \
         vim && \
     apt-get clean
 
+rm -rf ./scaleway
+git clone https://github.com/olsio/scaleway.git scaleway
+
 cp -R ./scaleway/openvpn/* /
 
 # Scaleway specific
@@ -68,24 +71,9 @@ remote $MY_IP_ADDR 1194 udp
 remote $MY_IP_ADDR 443 tcp-client
 </connection>
 EOF
-	PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-	BASEDIR=/tmp/publish-vpn-config
-	UUID=$(uuid)
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-	rm -rf $BASEDIR && mkdir -p $BASEDIR/$UUID && touch $BASEDIR/index.html
-	cp /root/client.ovpn $BASEDIR/$UUID/$(oc-metadata --cached HOSTNAME).ovpn
-
-	(ps aux | grep SimpleHTTP | grep -v grep | awk '{print $2}' | xargs kill -9) >/dev/null 2>/dev/null
-	sleep .1
-	(cd $BASEDIR && python -m SimpleHTTPServer 8000 &) >/dev/null 2>/dev/null
-	scw-sync-kernel-modules
-	depmod -a
-	service iptables-persistent restart
-	service openvpn stop
-	service openvpn start
-
-##############################################################
-# Replace default dhparam with fresh primes
-##############################################################
-(openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /etc/openvpn/dh.pem; service openvpn stop; service openvpn start) &
+scw-sync-kernel-modules
+depmod -a
+reboot
