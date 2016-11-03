@@ -124,7 +124,7 @@ $le_path/letsencrypt-auto certonly -a webroot --agree-tos --config $config_file
 
 password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 echo $password | htpasswd -csi /etc/nginx/.htpasswd ghost
-echo "$password" > /root/ghost.password
+echo "$password" > /root/ghost.txt
 
 ##############################################################
 # Enable SSL nginx site
@@ -142,4 +142,4 @@ nohup sh -c 'openssl dhparam -out /tmp/dhparam.pem 4096; mv /tmp/dhparam.pem /et
 # Pring Ghost admin password
 ##############################################################
 echo "Ghost Password"
-cat /root/ghost.password
+cat /root/ghost.txt
