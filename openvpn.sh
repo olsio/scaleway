@@ -47,7 +47,7 @@ chmod 600 /etc/openvpn/key.pem
 
 MY_IP_ADDR=$(wget http://ipinfo.io/ip -qO -)
 
-cat <<EOF > /root/client.ovpn
+cat <<EOF > /root/$(hostname).ovpn
 client
 nobind
 dev tun
