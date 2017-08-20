@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# This script runs as a pre hook for openvpn instanciated services.
+# It takes the name of the config file to be generated without
+# extension as the first argument.
+
+set -e
+
+. scw-ovpn-lib
+
+config_name="$(expect "$1" 'missing config name')"
+config_path="/etc/openvpn/${config_name}.conf"
+
+get_group () {
+    sed -rn "s:^${service_arg_regex}\$:\\${1}:p" <<< "${2}"
+}
+
+protocol="$(get_group 2 "${1}")"
+port="$(get_group 3 "${1}")"
+id="$(get_group 4 "${1}")"
+has_ipv6 && ipv6='yes' || ipv6='no'
+
+scw-ovpn-gen-server "${protocol}" "${port}" "${id}" "${ipv6}" > "${config_path}"

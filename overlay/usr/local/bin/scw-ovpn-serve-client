@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help serve CLIENTNAME)
+starts an HTTP server you can download your openvpn client configuration from
+EOF
+
+: "${http_port:=4242}"
+
+user="$(safe_path "$1")"
+
+tmp_dir="$(mktemp -d)"
+trap "rm -rf '${tmp_dir}'" EXIT
+
+touch "${tmp_dir}/index.html"
+subdir="${tmp_dir}/$(uuid)"
+mkdir -p "${subdir}"
+fname="${subdir}/${user}.ovpn"
+
+scw-ovpn-show-client "${user}" > "${fname}"
+echo "You can now download the openvpn client configuration at :"
+for addr in $(meta PUBLIC_IP_ADDRESS IPV6_ADDRESS); do
+    echo ">> http://${addr}:${http_port}/${fname##"${tmp_dir}/"}"
+done
+
+(
+    cd "${tmp_dir}"
+    echo ">>> Press ENTER to stop serving the config file"
+    python -m SimpleHTTPServer "${http_port}" &
+    trap "kill $!" EXIT
+    read
+)

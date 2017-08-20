@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help list-instances)
+list all running openvpn instances
+EOF
+
+list_instances | while read instance; do
+    name="$(cut -d ' ' -f 1  <<< "${instance}")"
+    proto="$(cut -d ' ' -f 2 <<< "${instance}")"
+    port="$(cut -d ' ' -f 3  <<< "${instance}")"
+    id="$(cut -d ' ' -f 4  <<< "${instance}")"
+    echo -e "${proto}\t${port}\t${id}\t$(systemctl is-active openvpn@${name} || :)"
+done

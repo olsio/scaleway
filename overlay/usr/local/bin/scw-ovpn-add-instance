@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help add-instance PROTOCOL PORT ID)
+add an openvpn instance listenning on PORT with PROTOCOL.
+protocol must be one of udp and tcp.
+EOF
+
+proto="$(validate_proto "$1")"
+port="$(validate_port "$2")"
+id="$(validate_id "$3")"
+
+! list_instances | cut -d ' ' -f 4 | grep -wq "${id}" \
+    || fail "id '${id}' already in use, pick another one"
+
+! list_instances | cut -d ' ' -f 2-3 | grep -wq "${proto} ${port}" \
+    || fail "port and protocols ${proto}/${port} already in use, pick some others"
+
+systemctl enable --now "openvpn@${proto}_${port}_${id}"

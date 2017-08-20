@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help create CLIENTNAME)
+create a new certificate with name CLIENTNAME
+EOF
+
+
+if [ ! -f "${easyrsa}"/done ]; then
+    fail "The openvpn server init script started but didn't succeed." 1
+fi
+
+cd "${easyrsa}"
+
+for client_name in "$@"; do
+    if [ -f "${easyrsa_keys}/${client_name}.crt" ]; then
+	fail "There already is a certificate with name '${client_name}'" 2
+    fi
+
+    . ./vars
+    ./pkitool "${client_name}"
+done

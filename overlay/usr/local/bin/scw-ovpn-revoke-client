@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help revoke CLIENTNAME)
+revoke the certificate for CLIENTNAME. This client will not be able to connect afterwards.
+EOF
+
+client_name="$(expect "$1" 'missing client name')"
+
+cd "${easyrsa}"
+
+. ./vars
+./revoke-full "${client_name}"
+
+systemctl reload openvpn

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -e
+
+. /etc/openvpn/scw-vars.sh
+
+
+if [ -d "${easyrsa}" ]; then
+    echo "Found an existing easy-rsa dir in ${easyrsa}."
+    echo "Remove it by yourself if you really want to regenerate"
+    echo "the CA and server certs."
+    exit 1
+fi
+
+
+logdo () {
+    echo ">> Running $@"
+    local program="$1"
+    shift
+    "$program" "$@"
+}
+
+
+mkdir -p "${easyrsa}"
+cd "${easyrsa}"
+cp /usr/share/easy-rsa/* .
+
+source ./vars
+
+logdo ./clean-all
+logdo ./pkitool --initca
+logdo ./pkitool --server myvpn
+logdo ./build-dh
+
+logdo openvpn --genkey --secret "${KEY_DIR}"/ta.key
+
+# easy-rsa does not generate the initial revocation list
+export KEY_CN='sample'
+export KEY_ALTNAMES='sample'
+logdo openssl ca -gencrl -out "${KEY_DIR}"/crl.pem -config "${KEY_CONFIG}"
+
+
+touch "${easyrsa}"/done
+
+systemctl disable init-openvpn

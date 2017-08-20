@@ -1,0 +1,11 @@
+[Unit]
+Description=setup unbound for vpn forwarding
+Before=unbound.service
+
+[Service]
+ExecStart=/usr/local/bin/scw-setup-unbound
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help gen-server PROTO PORT ID HAS_IPv6)
+Prints out an openvpn server config for some instance.
+PROTO is one of tcp and udp, ID is the subnet ID and
+HAS_IPV6 a boolean among yes or no.
+EOF
+
+proto="$(expect "$1" 'missing protocol')"
+port="$(expect "$2" 'missing port')"
+id="$(expect "$3" 'missing id')"
+has_ipv6="$(expect "$4" 'missing has_ipv6 boolean')"
+
+common () {
+    cat <<EOF
+# This configuration file was generated on service start
+# using $0
+# Do not edit it directly.
+
+proto $(get_ovpn_proto "${proto}" "${has_ipv6}" server)
+port ${port}
+
+dev tun${proto}${port}
+
+keepalive 10 60
+persist-key
+persist-tun
+topology subnet
+
+verb 3
+
+# CERTS
+duplicate-cn
+key  ${easyrsa_keys}/${server_name}.key
+cert ${easyrsa_keys}/${server_name}.crt
+ca   ${easyrsa_keys}/ca.crt
+dh   ${easyrsa_keys}/dh2048.pem
+
+# hardening
+remote-cert-tls client
+tls-auth ${easyrsa_keys}/ta.key 0
+crl-verify ${easyrsa_keys}/crl.pem
+
+$(optional tls-version-min "${openvpn_tls_version_min}")
+$(optional tls-cipher "${openvpn_tls_cipher}")
+$(optional cipher "${openvpn_cipher}")
+$(optional auth "${openvpn_auth}")
+
+reneg-sec 60
+EOF
+}
+
+
+dns_servers_v4 () {
+    for DNS_SERVER_4 in $1; do
+	echo "push \"dhcp-option DNS ${DNS_SERVER_4}\""
+    done
+}
+
+
+ipv4_specific () {
+    echo "server ${ipv4_prefix}.${id}.0 255.255.255.0"
+    dns_servers_v4 "${ipv4_prefix}.${id}.1"
+}
+
+
+ipv6_specific () {
+    local ipv6_subnet="${ipv6_prefix}:$(printf "%x" "${id}")::0/64"
+    cat<<EOF
+server-ipv6 ${ipv6_subnet}
+push "route-ipv6 ${ipv6_subnet}"
+push "route-ipv6 2000::/3"
+push "redirect-gateway ipv6"
+EOF
+}
+
+
+common
+ipv4_specific
+ipv6_specific

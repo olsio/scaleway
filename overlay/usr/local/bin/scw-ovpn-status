@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help status)
+shows the status of the initial openvpn configuration
+EOF
+
+is_done () {
+    [ -f "${easyrsa}"/done ]
+}
+
+is_done || {
+    echo "Your openvpn server is currently configuring."
+    echo "It might take a while."
+}
+
+while true; do
+    if is_done; then
+	echo
+        cat <<EOF
+Your server is done configuring !
+You can now start using it.
+
+Have a look at what scw-ovpn features:
+     $ scw-ovpn
+EOF
+	exit 0
+    fi
+
+    if systemctl is-failed -q init-openvpn; then
+        cat <<EOF >&2
+The openvpn initialization process failed.
+Please report the issue along with the output of:
+       $ journalctl -q -o cat -u init-openvpn
+EOF
+	exit 1
+    fi
+    echo -n .
+    sleep 1
+done

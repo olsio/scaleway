@@ -1,0 +1,11 @@
+[Unit]
+Description=setup vpn nat
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/scw-setup-nat
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

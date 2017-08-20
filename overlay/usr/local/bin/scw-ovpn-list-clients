@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help list)
+list all available and revoked clients in separate lists
+EOF
+
+clients_list="$(clients_status_name)"
+clients_valid="$(type_filter V <<< "${clients_list}")"
+clients_revoked="$(type_filter R <<< "${clients_list}")"
+
+[ -n "${clients_valid}" ] && {
+    echo "available clients:"
+    print_padded <<< "${clients_valid}"
+} || echo "no available clients"
+
+[ -n "${clients_revoked}" ] && {
+    echo "revoked clients:"
+    print_padded <<< "${clients_revoked}"
+} || :

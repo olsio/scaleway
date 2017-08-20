@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+export OVPN_CMD="$(basename "$0")"
+#cmds=$(ls_xpath | sed -rn -e '/-hook$/!s/^scw-ovpn-(.+)$/\1/p')
+cmds=(
+    status
+    create-client
+    list-clients
+    revoke-client
+    show-client
+    serve-client
+    add-instance
+    del-instance
+    list-instances
+)
+
+proxy () {
+    local op="$1"
+    local rc=FAIL
+    shift
+    for cmd in "scw-ovpn-${op}"{,-client{,s}}; do
+	if hash "${cmd}" 2>/dev/null; then
+	    rc=0
+	    "${cmd}" "$@" || {
+		rc=$?
+		echo >&2
+		get_help "${cmd}"
+	    }
+	    break
+	fi
+    done
+    if [ "$rc" = FAIL ]; then
+	PROXY_FAILED=yes
+	return 0
+    fi
+    return $rc
+}
+
+get_help () {
+    local cmd="$1"
+    shift
+    OVPN_HELP=yes "$cmd" "$@"
+}
+
+print_help () {
+    cat <<EOF
+This wrapper helps you manage your openvpn server.
+Use these commands to create an user and get a link to its configuration:
+	$(cmd_help create MYUSER)
+	$(cmd_help serve MYUSER)
+
+If you do not want to transfer your configuration over cleartext HTTP, type this command on your own machine:
+	$(cmd_color "ssh root@$(meta PUBLIC_IP_ADDRESS) ${OVPN_CMD} show MYUSER > MYUSER.ovpn")
+
+You could also copy-paste the output of:
+	$(cmd_help show MYUSER)
+
+Or even use port forwarding to tunnel your requests to the port the http server listens on when running '$(cmd_help serve) ...'.
+
+Choose the way you like and understand !
+
+EOF
+    for cmd in "${cmds[@]}"; do
+	get_help "scw-ovpn-$cmd" | print_padded $'\t'
+	echo
+    done
+    return 1
+}
+
+cd "${easyrsa}"
+
+op="${1}"
+shift || print_help || exit 0
+
+proxy "${op}" "$@"
+
+if [ "${PROXY_FAILED}" = yes ]; then
+    print_help
+fi

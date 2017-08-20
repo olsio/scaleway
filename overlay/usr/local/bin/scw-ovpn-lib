@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+set -e
+
+. /etc/openvpn/scw-vars.sh
+
+tput_safe () {
+    tput "$@" 2>/dev/null || true
+}
+
+esc_red=$(tput_safe setaf 1)
+esc_green=$(tput_safe setaf 2)
+esc_reset=$(tput_safe sgr0)
+
+fail () {
+    echo "${esc_red}${1}${esc_reset}" >&2
+    exit "${2:-1}"
+}
+
+help_text () {
+    if [ "${OVPN_HELP}" = yes ]; then
+	cat
+        return 1
+    fi
+    return 0
+}
+
+cmd_color () {
+    echo "${esc_reset}\$${esc_green}" "$@" "${esc_reset}"
+}
+
+cmd_help () {
+    cmd_color "${OVPN_CMD}" "$@"
+}
+
+safe_path () {
+    [[ "$(basename "$1")" == "$1" ]] \
+	&& echo "$1" \
+	|| fail "'$1' is not a sane path"
+}
+
+clients_format () {
+    local groups="${1:-\\1}"
+    local states='\([VR]\)'
+    local main_group='CN=\([^/]*\)/'
+    sed -n \
+	-e "/.*CN=${server_name}\/.*/ d"  \
+	-e "s:${states}.*${main_group}.*:${groups}:p" \
+	"${easyrsa_keys}"/index.txt
+}
+
+clients_status_name () {
+    clients_format "\\1 \\2"
+}
+
+type_filter () {
+    local type="$1"
+    sed -n "s/${type} \(.*\)/\1/p"
+}
+
+print_padded() {
+    local padding="${1:-  >> }"
+    sed -rn "s/^(.+)\$/${padding}\1/p"
+}
+
+service_arg_regex='(([a-z]+)_([0-9]+)_([0-9]+))'
+list_instances () {
+    ls /etc/systemd/system/multi-user.target.wants/ | \
+	sed -rn "s:^openvpn@${service_arg_regex}.service$:\1 \2 \3 \4:p"
+}
+
+instance_by_id () {
+    local id="$1"
+    egrep " ${id}\$" | {
+	read -r line
+        [[ $(wc -l) == 0 ]] || fail "duplicate ID: $id"
+        cut -d ' ' -f 1 <<< "$line"
+    }
+}
+
+validate () {
+    egrep "^${1}\$" <<< "$2" || fail "$3"
+}
+
+validate_proto () {
+    validate '(tcp|udp)' "$1" "protocol must be tcp or udp"
+}
+
+validate_port () {
+    local port="$1"
+    validate '[0-9]+' "${port}" "port must be a number"
+    (( port < 65535 && port > 0)) || fail "port must be between 0 and 65535 included"
+}
+
+validate_id () {
+    local id="$1"
+    validate '[0-9]+' "$id" "id must be a number"
+    (( id >= 0 && id < 256 )) || fail "id must be between 0 and 255 included"
+}
+
+ls_xpath () {
+    local IFS=':'
+    find $PATH -executable -maxdepth 1 -type f -printf '%f\n'
+}
+
+meta () {
+    for key in "$@"; do
+	scw-metadata --cached "$key"
+    done
+}
+
+has_ipv6 () {
+    [ -n "$(meta IPV6_ADDRESS)" ]
+}
+
+optional () {
+    local option="$1"
+    local value="$2"
+    if [ -n "$value" ]; then
+	echo "$option" "$value"
+    fi
+}
+
+expect () {
+    [ -n "$1" ] || fail "${2:-missing argument}"
+    echo "$1"
+}
+
+get_ovpn_proto () {
+    local proto="$1"
+    local has_ipv6="$2"
+    local role="$3"
+    local proto_fail="unknown protocol '$proto'"
+    if [[ "${has_ipv6}" == 'yes' ]]; then
+	case "$proto" in
+	    "tcp") echo "tcp6-${role}" ;;
+	    "udp") echo 'udp6' ;;
+	    *)     fail "$proto_fail" ;;
+	esac
+    else
+	case "$proto" in
+	    "tcp") echo "tcp-${role}" ;;
+	    "udp") echo 'udp' ;;
+	    *)     fail "$proto_fail" ;;
+	esac
+    fi
+
+}

@@ -1,0 +1,10 @@
+[Unit]
+Description=initialize openvpn on first boot
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/scw-ovpn-init-server
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

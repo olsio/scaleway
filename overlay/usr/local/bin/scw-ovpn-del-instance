@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help del-instance ID)
+removes the openvpn instance with subnet id ID
+EOF
+
+id="$(validate_id "$1")"
+instance_name="$(list_instances | instance_by_id "$id")"
+systemctl disable --now "openvpn@${instance_name}.service"

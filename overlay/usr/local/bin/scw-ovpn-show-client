@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+cat <<EOF | help_text || exit 0
+$(cmd_help show CLIENTNAME)
+shows the openvpn config file for client CLIENTNAME
+EOF
+
+client_name="$(expect "$1" 'missing client name')"
+
+get () {
+    local path="${easyrsa_keys}/${1}"
+    [ -f "${path}" ] || return 1
+    cat "${path}"
+}
+
+
+set_common() {
+    ca_crt="$(get ca.crt)"
+    dh2048="$(get dh2048.pem)"
+    tls_auth="$(get ta.key)"
+}
+
+
+set_client_specific () {
+    key="$(get ${client_name}.key)"
+    cert="$(get ${client_name}.crt)"
+}
+
+
+set_common || {
+    echo "The openvpn initialization service isn't done yet."
+    echo "Wait a bit and retry."
+    exit 1
+}
+
+set_client_specific || 	{
+    echo "Path does not exist: ${path}"
+    echo "Please generate the client configuration using"
+    echo "$ scw-ovpn-gen-client-cert ${client_name}"
+    exit 2
+}
+
+cat <<EOF
+client
+nobind
+dev tun
+redirect-gateway def1
+<key>
+${key}
+</key>
+<cert>
+${cert}
+</cert>
+<ca>
+${ca_crt}
+</ca>
+<dh>
+${dh2048}
+</dh>
+
+# hardening
+remote-cert-tls server
+
+$(optional tls-version-min "${openvpn_tls_version_min}")
+$(optional tls-cipher "${openvpn_tls_cipher}")
+$(optional cipher "${openvpn_cipher}")
+$(optional auth "${openvpn_auth}")
+
+key-direction 1
+<tls-auth>
+${tls_auth}
+</tls-auth>
+EOF
+
+print_connections () {
+    local remote="$1"
+    local ipv6="$2"
+    while read instance; do
+	[ -n "$instance" ] || continue
+	local name="$(cut -d ' ' -f 1  <<< "${instance}")"
+	local proto="$(cut -d ' ' -f 2 <<< "${instance}")"
+	local port="$(cut -d ' ' -f 3  <<< "${instance}")"
+	local id="$(cut -d ' ' -f 4  <<< "${instance}")"
+
+	echo '<connection>'
+	echo "  remote ${remote} ${port} $(get_ovpn_proto "$proto" "$ipv6" client)"
+	echo '</connection>'
+    done
+}
+
+ipv6_address="$(meta IPV6_ADDRESS)"
+ipv4_address="$(meta PUBLIC_IP_ADDRESS)"
+
+format_instances () {
+    print_connections "${ipv4_address}" no <<< "${1}"
+    ! has_ipv6 || print_connections "${ipv6_address}" yes <<< "${1}"
+}
+
+proto_filter () {
+    egrep "^$1"
+}
+
+instances="$(list_instances)"
+format_instances "$(proto_filter udp <<< "$instances")"
+format_instances "$(proto_filter tcp <<< "$instances")"

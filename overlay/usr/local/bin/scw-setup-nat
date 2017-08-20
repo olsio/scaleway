@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+. scw-ovpn-lib
+
+snat_wrap () {
+    local cmd="$1"; shift
+    "$cmd" -t nat -I POSTROUTING -s "$1" -o eth0 -j SNAT --to "$2"
+}
+
+snat_wrap iptables "${ipv4_net}" "$(meta PRIVATE_IP)"
+! has_ipv6 || snat_wrap ip6tables "${ipv6_net}" "$(meta IPV6_ADDRESS)"
